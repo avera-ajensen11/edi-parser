@@ -1,4 +1,4 @@
-from edi_835_parser.elements.utilities import split_element, _identify_delim
+from edi_parser.elements.utilities import split_element, _identify_delim
 
 
 def test_delim_identification():

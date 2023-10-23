@@ -4,7 +4,7 @@ venv
 __pycache__
 .idea
 .pytest_cache
-/edi_835_parser.egg-info/
+/edi_parser.egg-info/
 /build/
 /dist/
 /poetry.lock

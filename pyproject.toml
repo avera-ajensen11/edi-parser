@@ -5,7 +5,7 @@ description = "A simple EDI 835 file format parser."
 authors = ["Keiron Stoddart <keiron.stoddart@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "edi_835_parser"}]
+packages = [{include = "src/edi_parser"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
