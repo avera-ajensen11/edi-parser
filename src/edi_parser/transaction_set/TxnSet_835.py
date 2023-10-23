@@ -1,4 +1,3 @@
-import os
 from collections import namedtuple
 from typing import Iterator, List, Optional
 
@@ -11,30 +10,23 @@ from edi_parser.segments.financial_information import (
     FinancialInformation as FinancialInformationSegment,
 )
 from edi_parser.segments.ISA_interchange import Interchange as InterchangeSegment
-from edi_parser.segments.utilities import (
-    find_classes_by_substring,
-    find_identifier,
-    split_segment,
-)
+from edi_parser.segments.utilities import find_identifier
+from edi_parser.transaction_set.transaction_set import TransactionSet
 
 BuildAttributeResponse = namedtuple('BuildAttributeResponse', 'key value segment segments')
 
 
-class TransactionSet:
+class TxSet_835(TransactionSet):
 
 	def __init__(
 			self,
+			interchange: InterchangeSegment,
+			financial_information: FinancialInformationSegment,
+			claims: List[ClaimLoop],
+			organizations: List[OrganizationLoop],
 			file_path: str,
 	):
-		self.file_path = file_path
-
-		with open(file_path) as f:
-			file = f.read()
-
-		segments = file.split('~')
-		segments = [segment.strip() for segment in segments]
-
-		self.segments = iter(segments)
+		super().__init__(self, interchange, financial_information, claims, organizations, file_path)
 
 	def __repr__(self):
 		return '\n'.join(str(item) for item in self.__dict__.items())
@@ -130,8 +122,6 @@ class TransactionSet:
 		claims = []
 		organizations = []
 
-		currFilePath = os.path.dirname(os.path.abspath(__file__))
-
 		with open(file_path) as f:
 			file = f.read()
 
@@ -141,21 +131,8 @@ class TransactionSet:
 		segments = iter(segments)
 		segment = None
 
-		# Find ST segment, and then create a "TransactionSet" extended class based on that 3-digit number
-		for segment in segments:
-			seg_id = find_identifier(segment)
-			if seg_id == 'ST':
-				seg_props = split_segment(segment)
-				txn_set_code = seg_props[1]
-				classes = find_classes_by_substring(currFilePath, txn_set_code)
-				if len(classes) > 0:
-					ediClass = classes[0]
-					return ediClass[1](file_path)
-
-		"""		
 		while True:
 			response = cls.build_attribute(segment, segments)
-
 			segment = response.segment
 			segments = response.segments
 
@@ -176,7 +153,6 @@ class TransactionSet:
 				claims.append(response.value)
 
 		return TransactionSet(interchange, financial_information, claims, organizations, file_path)
-		"""
 
 	@classmethod
 	def build_attribute(cls, segment: Optional[str], segments: Iterator[str]) -> BuildAttributeResponse:
